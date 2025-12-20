@@ -9,9 +9,8 @@ print("Loading bot...")
 
 AUTHORIZED_ROLE_ID = None
 
-# ---------------------------
 # Creation of Teams
-# ---------------------------
+
 class Teams:
     def __init__(self, nom, points):
         self.nom = nom
@@ -22,9 +21,8 @@ class Teams:
 
 teams = {}
 
-# ---------------------------
 # Fichier JSON
-# ---------------------------
+
 DATA_FILE = "teams.json"
 
 def load_teams():
@@ -45,15 +43,15 @@ def save_teams():
 
 load_teams()
 
-# ---------------------------
+
 # Setup du Bot
-# ---------------------------
+
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix="!" ,intents=discord.Intents.all())
 
-# ---------------------------
+
 # Commandes et événements
-# ---------------------------
+
 @bot.event
 async def on_ready():
     print(f"Bot connecté en tant que {bot.user}")
@@ -140,7 +138,6 @@ async def team_classement(interaction: discord.Interaction):
         )
     await interaction.response.send_message(embed=classement_embed)
 
-# ---------------------------
+
 # Démarrage du Bot
-# ---------------------------
 bot.run(os.getenv('DISCORD_TOKEN'))
