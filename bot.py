@@ -68,13 +68,15 @@ async def on_message(message: discord.message):
         channel = message.channel
         await channel.send(
             "Ta besoin d'aide ? Voici les **commandes** dispo ! :\n" \
-            "- **/new-team** : Ajouter une nouvelle équipe a l'event\n" \
+            "- **/set-role** : Mettre à jour le role Modo d'event\n" \
+            "- **/new-team** : Ajouter une nouvelle équipe à l'event\n" \
+            "- **/remove-team** : Enlever une nouvelle équipe à l'event\n" \
             "- **/add-points** : Ajouter des points à une équipe\n" \
             "- **/remove-points** : Enlever des points à une équipe\n" \
             "- **/classement** : Afficher le classement des meilleurs équipes\n"
             )
 
-@bot.tree.command(name="set-role", description ="Changer le rôle ModoEvent")
+@bot.tree.command(name="set-role", description ="Changer le rôle Modo d'event")
 @app_commands.checks.has_permissions(administrator=True)
 async def setrole(interaction: discord.Interaction, role: discord.Role):
     global AUTHORIZED_ROLE_ID
@@ -103,6 +105,18 @@ async def newteam(interaction: discord.Interaction, nom: str,):
     teams[nom] = Teams(nom, points)
     save_teams()
     await interaction.response.send_message(f"L'équipe {nom} à été crée !")
+
+@bot.tree.command(name="remove-team", description ="Enlever une équipe a l'event")
+async def remove_team(interaction: discord.Interaction, nom: str,):
+    if not has_authorized_role(interaction):
+        await interaction.response.send_message("Tu n'as pas le droit d'effectuer cette commande !", ephemeral=True)
+        return
+    if nom not in teams:
+         await interaction.response.send_message("Nom déjà utiliser !!!", ephemeral=True)
+         return
+    del teams[nom]
+    save_teams()
+    await interaction.response.send_message(f"L'équipe {nom} à été supprimée !")
 
 @bot.tree.command(name="add-points", description ="Ajouter des points à une équipe !")
 async def addpoints(interaction: discord.Interaction, nom_team: str, nom_jeu: str, difficulté: int, bronze: int, silver: int, gold: int, plat: int, temps: int,):
@@ -146,7 +160,7 @@ async def team_classement(interaction: discord.Interaction, nom_team: str, nombr
 @bot.tree.command(name="classement", description ="Afficher le classement des meilleurs équipes")
 async def team_classement(interaction: discord.Interaction):
     if not teams:
-        await interaction.response.send_message("Il n'y a pas d'équipe actuelement")
+        await interaction.response.send_message("Il n'y a pas d'équipe actuellement")
         return
     classement = sorted(
         teams.values(),
