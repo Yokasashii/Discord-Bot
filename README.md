@@ -16,7 +16,9 @@ The “Platine-Them-All” bot supports an event created by streamer Nighting, i
 ## Bot control
 
 Commands that the bot takes into account:
+- **/set-role**: Update the Modo role of the event
 - **/new-team**: Add a new team to the event
+- **/remove-team**: Remove a new team from the event
 - **/add-points**: Add points to a team
 - **/remove-points**: Remove points to a team
 - **/classement**: Display the ranking of the best teams
