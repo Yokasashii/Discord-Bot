@@ -3,6 +3,7 @@ import json
 import os
 from dotenv import load_dotenv
 from discord.ext import commands
+from discord import app_commands
 load_dotenv()
 
 print("Loading bot...")
@@ -66,14 +67,35 @@ async def on_message(message: discord.message):
     if message.content.lower() == '$help':
         channel = message.channel
         await channel.send(
-            "Ta besoin d'aide ? Voici les **commandes** dispo ! :" \
-            "- **new-team** : Ajouter une nouvelle équipe a l'event" \
-            "- **add-points** : Ajouter des points à une équipe" \
-            "- **classement** : Afficher le classement des meilleurs équipes"
+            "Ta besoin d'aide ? Voici les **commandes** dispo ! :\n" \
+            "- **/new-team** : Ajouter une nouvelle équipe a l'event\n" \
+            "- **/add-points** : Ajouter des points à une équipe\n" \
+            "- **/remove-points** : Enlever des points à une équipe\n" \
+            "- **/classement** : Afficher le classement des meilleurs équipes\n"
             )
+
+@bot.tree.command(name="set-role", description ="Changer le rôle ModoEvent")
+@app_commands.checks.has_permissions(administrator=True)
+async def setrole(interaction: discord.Interaction, role: discord.Role):
+    global AUTHORIZED_ROLE_ID
+    AUTHORIZED_ROLE_ID = role.id
+    await interaction.response.send_message(f"le role a bien étais modifer et est maintentant {role.name}", ephemeral=True)
+
+def has_authorized_role(interaction: discord.Interaction) -> bool:
+    if AUTHORIZED_ROLE_ID is None:
+        return False
+    return any(role.id == AUTHORIZED_ROLE_ID for role in interaction.user.roles)
+
+@setrole.error
+async def setrole_error(interaction: discord.Interaction, error):
+    if isinstance(error, app_commands.MissingPermissions):
+        await interaction.response.send_message("Tu n'as pas le droit d'effectuer cette commande !", ephemeral=True)
 
 @bot.tree.command(name="new-team", description ="Ajouter une nouvelle équipe a l'event")
 async def newteam(interaction: discord.Interaction, nom: str,):
+    if not has_authorized_role(interaction):
+        await interaction.response.send_message("Tu n'as pas le droit d'effectuer cette commande !", ephemeral=True)
+        return
     points = 0
     if nom in teams:
          await interaction.response.send_message("Nom déjà utiliser !!!", ephemeral=True)
@@ -84,6 +106,9 @@ async def newteam(interaction: discord.Interaction, nom: str,):
 
 @bot.tree.command(name="add-points", description ="Ajouter des points à une équipe !")
 async def addpoints(interaction: discord.Interaction, nom_team: str, nom_jeu: str, difficulté: int, bronze: int, silver: int, gold: int, plat: int, temps: int,):
+    if not has_authorized_role(interaction):
+        await interaction.response.send_message("Tu n'as pas le droit d'effectuer cette commande !", ephemeral=True)
+        return
     if nom_team not in teams:
          await interaction.response.send_message("L'équipe n'existe pas", ephemeral=True)
          return
@@ -107,6 +132,9 @@ async def addpoints(interaction: discord.Interaction, nom_team: str, nom_jeu: st
 
 @bot.tree.command(name="remove-points", description ="Enlever un nombre de point definie")
 async def team_classement(interaction: discord.Interaction, nom_team: str, nombre_points: int):
+    if not has_authorized_role(interaction):
+        await interaction.response.send_message("Tu n'as pas le droit d'effectuer cette commande !", ephemeral=True)
+        return
     if nom_team not in teams:
          await interaction.response.send_message("L'équipe n'existe pas", ephemeral=True)
          return
