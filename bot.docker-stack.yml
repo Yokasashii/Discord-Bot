@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+  bot:
+    image: pta:latest
+    secrets:
+      - source: pta-bot-token
+        target: discord_token
+    volumes:
+      - type: bind
+        source: ./teams.json # /var/www/infra/service/pta-bot/
+        target: /app/teams.json
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+      update_config:
+        order: start-first
+        failure_action: rollback
+        monitor: 30s
+    networks: [pta-net]
+
+networks:
+  pta-net:
+    driver: overlay
+    attachable: true
+
+secrets:
+  pta-bot-token:
+    external: true

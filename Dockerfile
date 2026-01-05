@@ -24,5 +24,4 @@ COPY . .
 
 RUN adduser -D -u 1000 bot
 USER bot
-
-ENTRYPOINT [ "python" , "bot.py" ]
+ENTRYPOINT [ "sh", "-c", "export DISCORD_TOKEN=$(cat /run/secrets/discord_token) && python -u bot.py 2>&1 || (echo 'Bot crashed with exit code:' $?; sleep 30)" ]
